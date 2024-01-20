@@ -2,6 +2,4 @@
 @tailwind components;
 @tailwind utilities;
 
-.frosted-ui {
-  --default-font-family: var(--font-inter), sans-serif;
-}
+@import url("https://fonts.googleapis.com/css2?family=Merriweather:wght@300;400;700;900&family=Open+Sans:wght@300;400;500;600;700;800&display=swap");
