@@ -1,3 +1,4 @@
+import { addUser } from "@/lib/firebase/user";
 import { PageProps } from "@/lib/types";
 import BettingHome from "@/pages/BettingHome";
 import { WhopAPI, hasAccess, validateToken } from "@whop-apps/sdk";
@@ -35,6 +36,8 @@ export default async function Page({
     return <div>{user.error.message}</div>;
   }
 
+  // check and update user if not already existing
+  addUser(user.data);
   // Fetch content for the experience from your database
   const content = await myDatabase.getContent(experienceId);
 
