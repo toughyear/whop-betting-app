@@ -1,10 +1,32 @@
+"use client";
+import React, { useState } from "react";
+import { useToast } from "@/components/ui/use-toast";
 import { BadgeDollarSign, BadgeEuro } from "lucide-react";
 import { Label } from "@/components/ui/label";
 import { RadioGroup, RadioGroupItem } from "@/components/ui/radio-group";
-
-import React from "react";
+import { createEventWithDescription } from "@/lib/firebase/event";
 
 function Admin() {
+  const [eventDescription, setEventDescription] = useState("");
+  const { toast } = useToast();
+
+  const handleCreateEvent = async () => {
+    if (eventDescription) {
+      await createEventWithDescription(eventDescription);
+      // Reset the event description or handle post-creation logic
+      setEventDescription("");
+      toast({
+        title: "Event created",
+        description: "Users can now bet on this event",
+      });
+    } else {
+      toast({
+        title: "Event description is empty",
+        description: "Please enter a description for the event",
+      });
+    }
+  };
+
   return (
     <div className='bg-[#090A0C] p-4 text-white min-h-screen'>
       {/* dashboard */}
@@ -35,6 +57,8 @@ function Admin() {
               type='text'
               className='p-2 w-full outline-none text-lg font-semibold tracking-tight bg-transparent border-b-2 border-black placeholder:text-black/30'
               placeholder='this thing happen?'
+              value={eventDescription}
+              onChange={(e) => setEventDescription(e.target.value)}
             />
           </div>
           <h3 className='text-lg font-semibold text-gray-800 tracking-tight mt-10 font-open-sans'>
@@ -68,7 +92,10 @@ function Admin() {
               placeholder='20,000'
             />
             <h4 className='text-xl font-semibold ml-2'>Coins.</h4>
-            <button className='text-white bg-black rounded-xl py-3 px-6 self-start ml-auto'>
+            <button
+              className='text-white bg-black rounded-xl py-3 px-6 self-start ml-auto'
+              onClick={handleCreateEvent}
+            >
               PLACE BET
             </button>
           </div>

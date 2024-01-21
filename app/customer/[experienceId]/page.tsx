@@ -41,15 +41,5 @@ export default async function Page({
   // Fetch content for the experience from your database
   const content = await myDatabase.getContent(experienceId);
 
-  // Render the page that allows customers to view the content you or the
-  // company that installed your app have created
-  // return (
-  //   <div>
-  //     <h1>Welcome back: {user.data.name}</h1>
-  //     <h3>Content for {experienceId}</h3>
-  //     <p>{content}</p>
-  //   </div>
-  // );
-
   return <BettingHome userEmail={user.data.email} />;
 }

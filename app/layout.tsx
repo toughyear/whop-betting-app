@@ -6,6 +6,7 @@ import Script from "next/script";
 import "./globals.css";
 import { ClientLayout } from "./layout.client";
 import { LayoutProps } from "@/lib/types";
+import { Toaster } from "@/components/ui/toaster";
 
 const inter = Inter({
   subsets: ["latin"],
@@ -20,14 +21,15 @@ export const metadata: Metadata = {
 
 export default function RootLayout({ children }: LayoutProps) {
   return (
-    <html lang="en" suppressHydrationWarning>
+    <html lang='en' suppressHydrationWarning>
       <body className={inter.variable}>
         <ClientLayout>
           <Theme>{children}</Theme>
+          <Toaster />
         </ClientLayout>
         <Script
-          src="/_whop/analytics/analytics-v1.js"
-          strategy="afterInteractive"
+          src='/_whop/analytics/analytics-v1.js'
+          strategy='afterInteractive'
         />
       </body>
     </html>
