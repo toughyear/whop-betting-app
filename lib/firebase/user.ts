@@ -1,7 +1,7 @@
 import { db } from "@/lib/firebase/config";
 import { doc, setDoc, getDoc } from "firebase/firestore";
 
-interface User {
+export interface User {
   email?: string;
   id?: string;
   name?: string;
@@ -22,4 +22,16 @@ export async function addUser(user: User) {
   }
 
   console.log("user already exists");
+}
+
+export async function getUser(email: string): Promise<User | null> {
+  const userRef = doc(db, "users", email);
+  const docSnap = await getDoc(userRef);
+
+  if (docSnap.exists()) {
+    return docSnap.data();
+  }
+
+  console.log("user does not exist");
+  return null;
 }

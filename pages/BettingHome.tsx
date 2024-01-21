@@ -1,16 +1,37 @@
+"use client";
+import useUserStore from "@/app/store/user";
 import { Label } from "@/components/ui/label";
 import ProgressIndicator from "@/components/ui/progress-circle";
 import { RadioGroup, RadioGroupItem } from "@/components/ui/radio-group";
+import { getUser } from "@/lib/firebase/user";
 import { BadgeDollarSign, BadgeEuro } from "lucide-react";
-import React from "react";
+import numbro from "numbro";
+import React, { useEffect } from "react";
 
-function BettingHome() {
+function BettingHome(props: { userEmail: string | undefined }) {
+  const setUser = useUserStore((state) => state.setUser);
+  const user = useUserStore((state) => state.user);
+
+  useEffect(() => {
+    async function fetchUser() {
+      if (!props.userEmail) return;
+
+      const fetchedUser = await getUser(props.userEmail);
+      if (!fetchedUser) return;
+      setUser(fetchedUser);
+    }
+
+    fetchUser();
+  }, [props.userEmail, setUser]);
+
+  if (!user) return "Loading...";
+
   return (
     <div className='bg-[#090A0C] p-4 text-white min-h-screen'>
       <div className='max-w-5xl mx-auto flex flex-col'>
         <div className='bg-[#322EFF] px-8 py-10 rounded-2xl mb-5'>
           <h1 className='text-3xl font-extrabold tracking-tight mb-5'>
-            Welcome Back, Jane!
+            Welcome Back, {user?.name}!
           </h1>
           <div className='flex items-center font-mono'>
             <h1 className='text-7xl font-thin tracking-tight'>
@@ -19,7 +40,8 @@ function BettingHome() {
             </h1>
             <div className='h-12 w-[2px] bg-white/70 mx-20'></div>
             <h1 className='text-7xl font-thin tracking-tight'>
-              3,100 <span className='text-white/40 text-4xl'>coins</span>
+              {numbro(user.coins).format({ thousandSeparated: true })}{" "}
+              <span className='text-white/40 text-4xl'>coins</span>
             </h1>
           </div>
         </div>

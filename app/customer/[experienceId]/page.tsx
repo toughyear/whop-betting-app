@@ -51,5 +51,5 @@ export default async function Page({
   //   </div>
   // );
 
-  return <BettingHome />;
+  return <BettingHome userEmail={user.data.email} />;
 }
