@@ -1,13 +1,25 @@
 "use client";
-import React, { useState } from "react";
+import React, { useEffect, useState } from "react";
 import { useToast } from "@/components/ui/use-toast";
-import { BadgeDollarSign, BadgeEuro } from "lucide-react";
+import {
+  BadgeDollarSign,
+  BadgeEuro,
+  Coins,
+  UserCircle2Icon,
+} from "lucide-react";
 import { Label } from "@/components/ui/label";
 import { RadioGroup, RadioGroupItem } from "@/components/ui/radio-group";
-import { createEventWithDescription } from "@/lib/firebase/event";
+import {
+  Event,
+  createEventWithDescription,
+  getEvents,
+  EventStatus,
+} from "@/lib/firebase/event";
 
 function Admin() {
   const [eventDescription, setEventDescription] = useState("");
+  const [events, setEvents] = useState<Event[]>([]); // State to store events
+
   const { toast } = useToast();
 
   const handleCreateEvent = async () => {
@@ -27,6 +39,16 @@ function Admin() {
     }
   };
 
+  // Fetch events when component mounts
+  useEffect(() => {
+    const fetchEvents = async () => {
+      const fetchedEvents = await getEvents();
+      setEvents(fetchedEvents);
+    };
+
+    fetchEvents();
+  }, []);
+
   return (
     <div className='bg-[#090A0C] p-4 text-white min-h-screen'>
       {/* dashboard */}
@@ -45,7 +67,7 @@ function Admin() {
         </div>
       </div>
 
-      <div className='m-5 flex flex-row'>
+      <div className='m-5 flex flex-row items-start'>
         {/* create event */}
         <div className='bg-[#DBFF4A] px-8 py-10 rounded-2xl w-2/3 mr-5 text-black flex flex-col'>
           <h3 className='text-2xl font-semibold tracking-tight'>
@@ -102,7 +124,41 @@ function Admin() {
         </div>
         {/* extra info on sidebar */}
         <div className='bg-white px-8 py-10 rounded-2xl w-1/3 text-gray-700'>
-          <h1 className='text-zinc-500'>Click on an event to see more info</h1>
+          <h1 className='text-zinc-500'>Events Created</h1>
+          <ul>
+            {events.map((event) => (
+              <li
+                key={event.id}
+                className='my-2 bg-gray-100 text-white border-[1px] p-2 rounded-lg flex flex-col'
+              >
+                {event.status === EventStatus.InProgress && (
+                  <p className=' text-sm text-neutral-700 border border-neutral-500 self-start rounded-full px-2 py-1'>
+                    Active
+                  </p>
+                )}
+                <h2 className='text-base font-medium mt-2 text-neutral-700'>
+                  Will {event.description}
+                </h2>
+
+                <div className='relative w-full h-6 bg-gray-200 shadow-lg my-5 rounded-full'>
+                  <div className='w-2/3 bg-[#DBFF4A] rounded-full h-6 shadow-md'></div>
+                </div>
+                <h2 className='text-neutral-600 font-mono'>
+                  &gt; 78% chance of happening.
+                </h2>
+                <div className='grid grid-cols-2 text-neutral-700 mt-5'>
+                  <div className='flex items-center text-sm font-mono font-semibold'>
+                    <UserCircle2Icon className='h-4 w-4 mr-2 text-[#322EFF]' />{" "}
+                    <p>112 votes</p>
+                  </div>
+                  <div className='flex items-center text-sm font-mono font-semibold'>
+                    <Coins className='h-4 w-4 mr-2 text-[#322EFF]' />{" "}
+                    <p>780,000 coins</p>
+                  </div>
+                </div>
+              </li>
+            ))}
+          </ul>
         </div>
       </div>
     </div>

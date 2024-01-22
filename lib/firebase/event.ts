@@ -2,7 +2,7 @@ import { db } from "@/lib/firebase/config";
 import { doc, setDoc, getDoc, collection, getDocs } from "firebase/firestore";
 import { nanoid } from "nanoid";
 
-enum EventStatus {
+export enum EventStatus {
   InProgress = "in_progress",
   Success = "success",
   Failure = "failure",
