@@ -16,6 +16,7 @@ import {
   subscribeToEvents,
 } from "@/lib/firebase/event";
 import { seededRandom } from "./BettingHome";
+import numbro from "numbro";
 
 function Admin() {
   const [eventDescription, setEventDescription] = useState("");
@@ -145,8 +146,11 @@ function Admin() {
                   <div className='w-2/3 bg-[#DBFF4A] rounded-full h-6 shadow-md'></div>
                 </div>
                 <h2 className='text-neutral-600 font-mono'>
-                  &gt; {seededRandom(event.id ?? "default") * 100}% chance of
-                  happening.
+                  &gt;{" "}
+                  {numbro(seededRandom(event.id ?? "default") * 100).format({
+                    mantissa: 2,
+                  })}
+                  % chance of happening.
                 </h2>
                 <div className='grid grid-cols-2 text-neutral-700 mt-5'>
                   <div className='flex items-center text-sm font-mono font-semibold'>
