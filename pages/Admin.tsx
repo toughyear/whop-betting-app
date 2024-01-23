@@ -12,9 +12,10 @@ import { RadioGroup, RadioGroupItem } from "@/components/ui/radio-group";
 import {
   Event,
   createEventWithDescription,
-  getEvents,
   EventStatus,
+  subscribeToEvents,
 } from "@/lib/firebase/event";
+import { seededRandom } from "./BettingHome";
 
 function Admin() {
   const [eventDescription, setEventDescription] = useState("");
@@ -39,14 +40,14 @@ function Admin() {
     }
   };
 
-  // Fetch events when component mounts
   useEffect(() => {
-    const fetchEvents = async () => {
-      const fetchedEvents = await getEvents();
-      setEvents(fetchedEvents);
-    };
+    // Subscribe to events
+    const unsubscribe = subscribeToEvents((newEvents) => {
+      setEvents(newEvents);
+    });
 
-    fetchEvents();
+    // Cleanup
+    return () => unsubscribe();
   }, []);
 
   return (
@@ -144,7 +145,8 @@ function Admin() {
                   <div className='w-2/3 bg-[#DBFF4A] rounded-full h-6 shadow-md'></div>
                 </div>
                 <h2 className='text-neutral-600 font-mono'>
-                  &gt; 78% chance of happening.
+                  &gt; {seededRandom(event.id ?? "default") * 100}% chance of
+                  happening.
                 </h2>
                 <div className='grid grid-cols-2 text-neutral-700 mt-5'>
                   <div className='flex items-center text-sm font-mono font-semibold'>

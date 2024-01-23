@@ -4,11 +4,21 @@ import { Label } from "@/components/ui/label";
 import ProgressIndicator from "@/components/ui/progress-circle";
 import { RadioGroup, RadioGroupItem } from "@/components/ui/radio-group";
 import { useToast } from "@/components/ui/use-toast";
-import { Event, getEvents } from "@/lib/firebase/event";
+import { Event, getEvents, subscribeToEvents } from "@/lib/firebase/event";
 import { Bet, createBet } from "@/lib/firebase/bet";
 import { BadgeDollarSign, BadgeEuro } from "lucide-react";
 import numbro from "numbro";
 import React, { useEffect, useState } from "react";
+
+export function seededRandom(str: string): number {
+  let hash = 0;
+  for (let i = 0; i < str.length; i++) {
+    const char = str.charCodeAt(i);
+    hash = (hash << 5) - hash + char;
+    hash = hash & hash; // Convert to 32bit integer
+  }
+  return Math.abs((hash % 1000) / 1000); // Normalize the result to [0, 1)
+}
 
 function BettingHome(props: { userEmail: string | undefined }) {
   const updateUserFromDB = useUserStore((state) => state.updateUserFromDB);
@@ -29,27 +39,24 @@ function BettingHome(props: { userEmail: string | undefined }) {
   }, [props.userEmail, updateUserFromDB]);
 
   useEffect(() => {
-    const fetchEvents = async () => {
-      const fetchedEvents = await getEvents();
-      setEvents(fetchedEvents);
+    // Subscribe to events
+    const unsubscribe = subscribeToEvents((newEvents) => {
+      setEvents(newEvents);
 
-      // for each event, create bets
-      const bets: Bet[] = [];
-      fetchedEvents.forEach((event) => {
-        bets.push({
-          event_id: event.id ?? "event_id_not_found",
-          will_happen: true,
-          user_id: user?.id ?? "user_id_not_found",
-          user_email: user?.email ?? "user_email_not_found",
-          amount: 0,
-        });
-      });
+      const bets: Bet[] = newEvents.map((event) => ({
+        event_id: event.id ?? "event_id_not_found",
+        will_happen: true,
+        user_id: user?.id ?? "user_id_not_found",
+        user_email: user?.email ?? "user_email_not_found",
+        amount: 0,
+      }));
 
       setBets(bets);
-    };
+    });
 
-    fetchEvents();
-  }, [user?.email, user?.id]);
+    // Cleanup
+    return () => unsubscribe();
+  }, [user]);
 
   const handlePlaceBet = async (eventId: string | undefined) => {
     const selectedBet = bets.find((bet) => bet.event_id === eventId);
@@ -155,14 +162,18 @@ function BettingHome(props: { userEmail: string | undefined }) {
                     </p>
                     <p className='px-2 py-1 bg-black/80 text-white mr-2'>US</p>
                   </div>
-                  <ProgressIndicator completion={70} />
-                  <p className='mx-auto text-sm font-bold text-neutral-600'>
-                    chance of happening
-                  </p>
+                  <div className='my-5 flex items-center'>
+                    <ProgressIndicator
+                      completion={seededRandom(event.id ?? "default") * 100}
+                    />
+                    <p className='mx-auto text-sm font-bold text-neutral-600'>
+                      chance of happening
+                    </p>
+                  </div>
 
                   {/* place bet */}
 
-                  <h3 className='text-lg font-semibold text-gray-800 tracking-tight mt-10 font-open-sans'>
+                  <h3 className='text-lg mt-auto font-semibold text-gray-800 tracking-tight font-open-sans'>
                     Place your bet
                   </h3>
 

@@ -1,3 +1,4 @@
+import numbro from "numbro";
 import React from "react";
 
 interface ProgressIndicatorProps {
@@ -33,7 +34,7 @@ const ProgressIndicator: React.FC<ProgressIndicatorProps> = ({
         />
       </svg>
       <span className='absolute text-lg font-extrabold text-blue-700 font-mono'>
-        {completion}%
+        {numbro(completion).format({ mantissa: 0 })}%
       </span>
     </div>
   );

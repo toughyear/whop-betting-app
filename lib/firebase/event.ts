@@ -1,5 +1,13 @@
 import { db } from "@/lib/firebase/config";
-import { doc, setDoc, getDoc, collection, getDocs } from "firebase/firestore";
+import {
+  doc,
+  setDoc,
+  getDoc,
+  collection,
+  getDocs,
+  query,
+  onSnapshot,
+} from "firebase/firestore";
 import { nanoid } from "nanoid";
 
 export enum EventStatus {
@@ -33,6 +41,24 @@ export async function createEventWithDescription(description: string) {
   };
   await createEvent(eventData);
 }
+
+// New function for event subscription
+export const subscribeToEvents = (
+  onEventsChanged: (events: Event[]) => void
+) => {
+  const eventsRef = collection(db, "events");
+  const q = query(eventsRef);
+
+  const unsubscribe = onSnapshot(q, (querySnapshot) => {
+    const updatedEvents: Event[] = [];
+    querySnapshot.forEach((doc) => {
+      updatedEvents.push(doc.data() as Event);
+    });
+    onEventsChanged(updatedEvents);
+  });
+
+  return unsubscribe;
+};
 
 export async function getEvent(eventId: string): Promise<Event | null> {
   const eventRef = doc(db, "events", eventId);
