@@ -5,42 +5,95 @@ import ProgressIndicator from "@/components/ui/progress-circle";
 import { RadioGroup, RadioGroupItem } from "@/components/ui/radio-group";
 import { useToast } from "@/components/ui/use-toast";
 import { Event, getEvents } from "@/lib/firebase/event";
-import { getUser } from "@/lib/firebase/user";
+import { Bet, createBet } from "@/lib/firebase/bet";
 import { BadgeDollarSign, BadgeEuro } from "lucide-react";
 import numbro from "numbro";
 import React, { useEffect, useState } from "react";
 
 function BettingHome(props: { userEmail: string | undefined }) {
-  const setUser = useUserStore((state) => state.setUser);
+  const updateUserFromDB = useUserStore((state) => state.updateUserFromDB);
   const user = useUserStore((state) => state.user);
-  const [events, setEvents] = useState<Event[]>([]); // State to store events
+  const [events, setEvents] = useState<Event[]>([]);
+  const [bets, setBets] = useState<Bet[]>([]);
 
   const { toast } = useToast();
 
   useEffect(() => {
-    async function fetchUser() {
-      if (!props.userEmail) return;
+    if (!props.userEmail) return;
 
-      const fetchedUser = await getUser(props.userEmail);
-      if (!fetchedUser) return;
-      setUser(fetchedUser);
-    }
+    const unsubscribe = updateUserFromDB(props.userEmail);
+    // Cleanup subscription on component unmount
+    return () => {
+      unsubscribe();
+    };
+  }, [props.userEmail, updateUserFromDB]);
 
-    fetchUser();
-  }, [props.userEmail, setUser]);
-
-  // Fetch events when component mounts
   useEffect(() => {
     const fetchEvents = async () => {
       const fetchedEvents = await getEvents();
       setEvents(fetchedEvents);
+
+      // for each event, create bets
+      const bets: Bet[] = [];
+      fetchedEvents.forEach((event) => {
+        bets.push({
+          event_id: event.id ?? "event_id_not_found",
+          will_happen: true,
+          user_id: user?.id ?? "user_id_not_found",
+          user_email: user?.email ?? "user_email_not_found",
+          amount: 0,
+        });
+      });
+
+      setBets(bets);
     };
 
     fetchEvents();
-  }, []);
+  }, [user?.email, user?.id]);
+
+  const handlePlaceBet = async (eventId: string | undefined) => {
+    const selectedBet = bets.find((bet) => bet.event_id === eventId);
+    if (
+      selectedBet?.amount === undefined ||
+      selectedBet?.will_happen === undefined
+    ) {
+      toast({ title: "Error", description: "Bet not found" });
+      return;
+    }
+
+    if (!eventId) {
+      toast({ title: "Error", description: "Event not found" });
+      return;
+    }
+    if (!user || !user.coins) {
+      toast({ title: "Error", description: "User not found" });
+      return;
+    }
+
+    if (selectedBet?.amount <= 0 || selectedBet?.amount > user.coins) {
+      toast({ title: "Invalid Bet", description: "Bet amount is not valid" });
+      return;
+    }
+
+    try {
+      await createBet({
+        event_id: eventId,
+        will_happen: selectedBet?.will_happen,
+        user_id: user.id ?? "user_id_not_found",
+        user_email: user.email ?? "user_email_not_found",
+        amount: selectedBet?.amount,
+      });
+
+      toast({
+        title: "Bet Placed",
+        description: "Your bet has been successfully placed",
+      });
+    } catch (error) {
+      toast({ title: "Error", description: "Failed to place bet" });
+    }
+  };
 
   if (!user) return "Loading...";
-
   return (
     <div className='bg-[#090A0C] p-4 text-white min-h-screen'>
       <div className='max-w-5xl mx-auto flex flex-col'>
@@ -115,6 +168,18 @@ function BettingHome(props: { userEmail: string | undefined }) {
 
                   <RadioGroup
                     defaultValue='will-happen'
+                    onValueChange={(value) => {
+                      const newBets = bets.map((bet) => {
+                        if (bet.event_id === event.id) {
+                          return {
+                            ...bet,
+                            will_happen: value === "will-happen",
+                          };
+                        }
+                        return bet;
+                      });
+                      setBets(newBets);
+                    }}
                     className='mt-5 [&_label]:text-lg [&_label:hover]:underline [&_label:hover]:cursor-pointer'
                   >
                     <div className='flex items-center space-x-2'>
@@ -140,13 +205,31 @@ function BettingHome(props: { userEmail: string | undefined }) {
                     </div>
                     <input
                       type='number'
+                      value={
+                        bets.find((bet) => bet.event_id === event.id)?.amount
+                      }
+                      onChange={(e) => {
+                        const newBets = bets.map((bet) => {
+                          if (bet.event_id === event.id) {
+                            return {
+                              ...bet,
+                              amount: parseInt(e.target.value),
+                            };
+                          }
+                          return bet;
+                        });
+                        setBets(newBets);
+                      }}
                       className='outline-none text-right min-w-0 text-lg font-semibold tracking-tight bg-transparent placeholder:text-black/30'
                       placeholder='20,000'
                     />
                     <h4 className='text-md font-semibold ml-1'>Coins.</h4>
                   </div>
 
-                  <button className='text-white bg-black rounded-lg text-sm py-2 px-4 self-start ml-auto'>
+                  <button
+                    className='text-white bg-black rounded-lg text-sm py-2 px-4 self-start ml-auto'
+                    onClick={() => handlePlaceBet(event.id)}
+                  >
                     PLACE BET
                   </button>
                 </article>
