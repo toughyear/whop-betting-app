@@ -4,12 +4,13 @@ import { Label } from "@/components/ui/label";
 import ProgressIndicator from "@/components/ui/progress-circle";
 import { RadioGroup, RadioGroupItem } from "@/components/ui/radio-group";
 import { useToast } from "@/components/ui/use-toast";
-import { Event, getEvents, subscribeToEvents } from "@/lib/firebase/event";
+import { Event, subscribeToEvents } from "@/lib/firebase/event";
 import { Bet, createBet } from "@/lib/firebase/bet";
 import { BadgeDollarSign, BadgeEuro } from "lucide-react";
 import numbro from "numbro";
 import React, { useEffect, useState } from "react";
-
+import Image from "next/image";
+import Logo from "@/components/ui/whop.png";
 export function seededRandom(str: string): number {
   let hash = 0;
   for (let i = 0; i < str.length; i++) {
@@ -102,7 +103,11 @@ function BettingHome(props: { userEmail: string | undefined }) {
 
   if (!user) return "Loading...";
   return (
-    <div className='bg-[#090A0C] p-4 text-white min-h-screen'>
+    <div className='bg-[#090A0C] p-4 text-white min-h-screen flex flex-col'>
+      <div className='flex mx-auto my-5'>
+        <Image src={Logo} alt='whop-logo' width={40} />
+        <h1 className='ml-2'>Powered by Whop</h1>
+      </div>
       <div className='max-w-5xl mx-auto flex flex-col'>
         <div className='bg-[#322EFF] px-8 py-10 rounded-2xl mb-5'>
           <h1 className='text-3xl font-extrabold tracking-tight mb-5'>
@@ -125,10 +130,10 @@ function BettingHome(props: { userEmail: string | undefined }) {
             <button className='text-white bg-black rounded-full py-3 px-6'>
               New Bets
             </button>
-            <button className='text-black bg-transparent border border-black rounded-full py-3 px-6 ml-5'>
+            <button className='text-black bg-transparent border border-black rounded-full hover:bg-gray-100 py-3 px-6 ml-5'>
               Running Bets
             </button>
-            <button className='text-black bg-transparent border border-black rounded-full py-3 px-6 ml-5'>
+            <button className='text-black bg-transparent border border-black rounded-full hover:bg-gray-100 py-3 px-6 ml-5'>
               Finished Bets
             </button>
           </div>
@@ -151,7 +156,7 @@ function BettingHome(props: { userEmail: string | undefined }) {
                     <span>2 hrs ago</span>
                   </p>
                   <p className='mt-6 font-display text-2xl font-semibold text-neutral-800'>
-                    {event.description}
+                    Will {event.description}
                   </p>
                   <div className='flex mt-4 text-sm font-mono'>
                     <p className='px-2 py-1 bg-black/80 text-white mr-2'>

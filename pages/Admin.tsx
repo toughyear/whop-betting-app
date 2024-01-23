@@ -17,6 +17,8 @@ import {
 } from "@/lib/firebase/event";
 import { seededRandom } from "./BettingHome";
 import numbro from "numbro";
+import Image from "next/image";
+import Logo from "@/components/ui/whop.png";
 
 function Admin() {
   const [eventDescription, setEventDescription] = useState("");
@@ -52,7 +54,11 @@ function Admin() {
   }, []);
 
   return (
-    <div className='bg-[#090A0C] p-4 text-white min-h-screen'>
+    <div className='bg-[#090A0C] p-4 text-white min-h-screen flex flex-col items-stretch'>
+      <div className='flex mx-auto'>
+        <Image src={Logo} alt='whop-logo' width={40} className='' />
+        <h1 className='ml-2'>Powered by Whop</h1>
+      </div>
       {/* dashboard */}
       <div className='bg-[#322EFF] px-8 py-10 rounded-2xl m-5'>
         <h1 className='text-3xl font-extrabold tracking-tight mb-5'>

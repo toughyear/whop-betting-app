@@ -1,7 +1,5 @@
-import useUserStore from "@/app/store/user";
 import { db } from "@/lib/firebase/config";
 import { doc, setDoc, getDoc, onSnapshot } from "firebase/firestore";
-import { useEffect } from "react";
 
 export interface User {
   email?: string;

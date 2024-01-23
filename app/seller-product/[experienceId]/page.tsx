@@ -35,10 +35,3 @@ export default async function Page({
   // Render the page that allows admins to configure the content served to users
   return <Admin />;
 }
-
-// <h1>Configure Experience: {experience.data.name}</h1>
-//       <h3>Company: {experience.data.company_id}</h3>
-//       <p>
-//         Attached to products:{" "}
-//         {experience.data.product_ids.join(", ") || "None yet."}
-//       </p>
